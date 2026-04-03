@@ -1,0 +1,43 @@
+# Dependencies & build
+node_modules/
+dist/
+
+# Local data & secrets
+data/
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+*~
+
+# Editors / IDEs (optional local state)
+.idea/
+*.swp
+*.swo
+
+# macOS Finder folder icon file (filename is Icon + carriage return)
+Icon

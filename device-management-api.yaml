@@ -1,0 +1,846 @@
+openapi: 3.1.0
+info:
+  version: "1.0"
+  title: Device Management API
+  summary: REST API documentation for device management
+  description: |-
+    APIs exposed within the device for device management
+
+    ### Response Codes
+    * 200 : Success 
+    * 400 : Bad Request (Input data is not proper)
+    * 401 : Unauthorized access with invalid credentials or invalid token
+    * 429 : Too many requests 
+    * 503 : Requested operation/service not supported
+
+    Rate Limit Details:
+    - SignIn API : Maximum 5 calls per minute
+    - Other APIs : Maximum 10 calls per minute
+  x-logo:
+    url: static/logitech.jpg
+    backgroundColor: rgb(250, 250, 250)
+    altText: Logitech Logo
+paths:
+  /api/v1/signin:
+    post:
+      summary: Sign In
+      description: |-
+        To Sign in to the VC Device. On successful signin, this shall provide an auth-token to be used with other apis. The generated auth-token is valid for 15 minutes from the time of generation.
+
+        ### Example Curl:
+        > curl -XPOST 'https://[ device_ipv4 ]/api/v1/signin' -H 'Content-Type: application/json' --data-raw '{"username":"[ lna username ]","password":"[ lna password ]"}' --insecure
+
+
+        Notes : '[ ]' values to be replaced with actual values
+      operationId: post-api-v1-signin
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              x-examples:
+                Example 1:
+                  username: admin
+                  password: Qwerty@1
+            examples:
+              Example 1:
+                value:
+                  username: admin
+                  password: Qwerty@1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      auth_token:
+                        type: string
+                x-examples:
+                  Example 1:
+                    code: 200
+                    message: ""
+                    result:
+                      auth_token: T3sCMRr1HEvil71RuRsIqifgLEx1yG
+              examples:
+                Example 1:
+                  value:
+                    code: 200
+                    message: ""
+                    result:
+                      auth_token: T3sCMRr1HEvil71RuRsIqifgLEx1yG
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    code: 401
+                    message: Invalid Credentials
+              examples:
+                Example 1:
+                  value:
+                    code: 401
+                    message: Invalid Credentials
+      x-internal: false
+      security: []
+    parameters: []
+  /api/v1/device:
+    get:
+      summary: Get  Device Config
+      description: |-
+        Basic Device Configuration
+
+        ### Example Curl:
+        > curl -XGET 'https://[ device_ipv4 ]/api/v1/device' -H 'accept-language: en-US,en' -H 'Content-Type: application/json' -H 'Authorization: Bearer [ auth_token ]' --insecure
+
+
+        Notes : '[ ]' values to be replaced with actual values | [auth_token] is received in signin api
+      operationId: get-api-v1-rest-device
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json
+          schema:
+            type: string
+      requestBody:
+        content: {}
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  result:
+                    $ref: "#/components/schemas/DeviceConfig"
+                x-examples:
+                  Example 1:
+                    code: 200
+                    message: ""
+                    result:
+                      collabOSVersion: 1.10.57
+                      deviceConfiguration: DEVICE
+                      ethernetMAC: 44:73:d6:85:7f:a3
+                      hwVersion: "3.1"
+                      modelName: Rally Bar Mini
+                      serialNumber: 2115FDZ01YE2
+                      systemName: RallyBarM-01YE2
+                      wifiMAC: 44:73:d6:85:7f:a4
+                      deviceName: Rally Bar Mini
+                      serviceProvider: MTR
+              examples:
+                Example 1:
+                  value:
+                    code: 200
+                    message: Success
+                    result:
+                      collabOSVersion: 1.00.00
+                      deviceConfiguration: DEVICE
+                      ethernetMAC: aa:ad:ac:44:44:a4
+                      hwVersion: "3.1"
+                      modelName: Rally Bar Mini
+                      serialNumber: 2115FSSSSSS
+                      systemName: RallyBarM-01YE2
+                      wifiMAC: aa:ad:ac:44:44:a4
+                      deviceName: Rally Bar Mini
+                      serviceProvider: MTR
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    code: 401
+                    message: Unauthorized
+              examples:
+                Example 1:
+                  value:
+                    code: 401
+                    message: Unauthorized
+      security:
+        - auth-token: []
+  /api/v1/peripherals:
+    get:
+      summary: Get Peripherals Data
+      description: |-
+        Retrieves following peripherals data attached to the device.
+        - Paired Remotes
+        - Connected Displays
+        - IP Controllers (TAP IP)
+        - USB Controllers (TAP USB)
+        - Sights (Logitech Sight)
+        - USB Devices (Other detectable USB Devices connected to the device)
+
+        ### Example Curl:
+        > curl -XGET 'https://[ device_ipv4 ]/api/v1/peripherals' -H 'accept-language: en-US,en' -H 'Content-Type: application/json' -H 'Authorization: Bearer [ auth_token ]' --insecure
+
+
+        Notes : 
+        - '[ ]' values to be replaced with actual values | [auth_token] is received in signin api
+        - If a particular device is not connected/not available, then the section shall be empty in the result.
+      operationId: get-api-v1-peripherals
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      remotes:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Remote"
+                      sights:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Sight"
+                      displays:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Display"
+                      ipControllers:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/IpController"
+                      usbControllers:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/USBController"
+                      usbDevices:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/USBDevice"
+                x-examples:
+                  Example 1:
+                    code: 200
+                    message: Success
+                    result:
+                      remotes:
+                        - macAddress: E0:F6:61:9D:9D:C8
+                          name: Rally Bar Mini Remote
+                      sights:
+                        - id: "2170"
+                          cameraConnected: true
+                          microphoneConnected: false
+                          firmwareVersion: 0.5.0
+                      displays:
+                        - id: 0
+                          hdmiPort: 1
+                          height: 1080
+                          width: 1920
+                          refreshRate: 60
+                      ipControllers:
+                        - firmwareVersion: 1.11.48
+                          ipAddress: 192.168.1.15
+                          orientation: AUTO
+                          serialNumber: 2129FDJT9UJ2
+                      usbControllers:
+                        - firmwareVersion: 1.1.7
+                          hdmiVersion: 1.1.7
+                          hwMcuVersion: "5"
+                          name: Tap
+                          orientation: AUTO
+                          swMcuVersion: 1.0.55
+                      usbDevices:
+                        - id: /dev/snd/controlC1
+                          isAudioDevice: true
+                          isVideoDevice: true
+                          audioFirmwareVersion: "1.1"
+                          videoFirmwareVersion: "1.1"
+                          name: HD Pro Webcam C920
+                          pid: "2277"
+                          vid: "1133"
+              examples:
+                Example 1:
+                  value:
+                    code: 200
+                    message: Success
+                    result:
+                      remotes:
+                        - macAddress: D3:A9:2C:5C:8E:A2
+                          name: Rally Bar Mini Remote
+                      sights:
+                        - id: "2170"
+                          cameraConnected: false
+                          microphoneConnected: true
+                          firmwareVersion: 0.5.0
+                      displays:
+                        - id: 0
+                          hdmiPort: 1
+                          height: 1080
+                          width: 1920
+                          refreshRate: 60
+                      ipControllers:
+                        - name: TAP IP
+                          manufacturer: Logitech
+                          firmwareVersion: 1.11.48
+                          serialNumber: "123456789"
+                          ipAddress: 192.168.1.15
+                          deviceName: TAP IP
+                      usbControllers:
+                        - name: Tap
+                          manufacturer: Logitech
+                          firmwareVersion: 1.1.7
+                          swMcuVersion: string
+                          hwMcuVersion: "5"
+                          hdmiVersion: 1.1.7
+                          orientation: AUTO
+                      usbDevices:
+                        - id: /dev/snd/controlC1
+                          isAudioDevice: true
+                          isVideoDevice: true
+                          audioFirmwareVersion: "1.1"
+                          videoFirmwareVersion: "1.1"
+                          name: HD Pro Webcam C920
+                          pid: "2277"
+                          vid: "1133"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    code: 401
+                    message: Unauthorized
+              examples:
+                Example 1:
+                  value:
+                    code: 401
+                    message: Unauthorized
+      security:
+        - auth-token: []
+  /api/v1/insights/room:
+    get:
+      summary: Get Room Insights
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    code: 0
+                    message: string
+                    result:
+                      occupancyCount: 2
+                      occupancyMode: ALWAYS_ON
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      occupancyCount:
+                        type: integer
+                      occupancyMode:
+                        type: string
+                      environmentalData:
+                        type: object
+                        x-stoplight:
+                          id: 6j8f1greunssg
+                        properties:
+                          co2:
+                            type: number
+                            x-stoplight:
+                              id: j5a0elmuovy7c
+                          temp:
+                            type: number
+                            x-stoplight:
+                              id: wt2t9w119ebhi
+                          tvoc:
+                            type: number
+                            x-stoplight:
+                              id: em6js1ofgan1c
+                          relativeHumidity:
+                            type: number
+                            x-stoplight:
+                              id: bwsymijbt3sbq
+                          pm10:
+                            type: number
+                            x-stoplight:
+                              id: p18kjzptgydvh
+                          pm25:
+                            type: number
+                            x-stoplight:
+                              id: b50i164060yej
+                          pressure:
+                            type: number
+                            x-stoplight:
+                              id: 4bbcjia17cdqu
+                          presence:
+                            type: string
+                            x-stoplight:
+                              id: h84tj4qwhxoyh
+                            enum:
+                              - OCCUPIED
+                              - UNOCCUPIED
+                            description: Presence detected by the sensor. Value is OCCUPIED or UNOCCUPIED. Field is omitted if the device does not support the presence sensor.
+              examples:
+                Example 1:
+                  value:
+                    code: 200
+                    message: Success
+                    result:
+                      occupancyCount: 2
+                      occupancyMode: ALWAYS_ON
+                      environmentalData:
+                        co2: 775
+                        pm10: 4.4
+                        pm25: 3.2
+                        presence: OCCUPIED
+                        pressure: -1
+                        relativeHumidity: 43.19
+                        temp: 24.315
+                        tvoc: 67
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    code: 401
+                    message: Unauthorized
+              examples:
+                Example 1:
+                  value:
+                    code: 401
+                    message: Unauthorized
+      operationId: get-api-v1-insights-room
+      description: "Retrieves insights about room along with environmental sensor data if available with the device.\r
+
+        \r
+
+        ### Example Curl:\r
+
+        > curl -XGET 'https://[ device_ipv4 ]/api/v1/insights/room' -H 'accept-language: en-US,en' -H 'Content-Type: application/json' -H 'Authorization: Bearer [ auth_token ]' --insecure\r
+
+        \r
+
+        \r
+
+        Notes : \r
+
+        - Environmental Data details are available only on CollabOS 1.15+\r
+
+        - '[ ]' values to be replaced with actual values | [auth_token] is received in signin api\r
+
+        - If the device has no camera or no camera connected, then the result shall be empty.\r
+
+        - This api can take a maximum time upto 15 seconds to detect the occupancy details in the room.\r
+
+        \r
+
+        ### Environmental Data Response Details:\r
+
+        \r
+
+        **Presence:**\r
+
+        - OCCUPIED\r
+
+        - UNOCCUPIED\r
+
+        - Field is omitted if the device does not support the presence sensor"
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/json
+  /api/v1/insights/device:
+    get:
+      summary: Get Device Insights
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      deviceState:
+                        type: string
+                      micState:
+                        type: string
+                      speakerState:
+                        type: string
+                      speakerMaxVolume:
+                        type: integer
+                      speakerVolume:
+                        type: integer
+                x-examples:
+                  Example 1:
+                    code: 200
+                    message: string
+                    result:
+                      deviceState: IDLE
+                      micState: UNMUTED
+                      speakerState: UNMUTED
+                      speakerMaxVolume: 10
+                      speakerVolume: 10
+              examples:
+                Example 1:
+                  value:
+                    code: 200
+                    message: Success
+                    result:
+                      deviceState: IDLE
+                      micState: UNMUTED
+                      speakerState: UNMUTED
+                      speakerMaxVolume: 10
+                      speakerVolume: 10
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    code: 401
+                    message: Unauthorized
+              examples:
+                Example 1:
+                  value:
+                    code: 401
+                    message: Unauthorized
+      operationId: get-api-v1-insights-device
+      description: "Retrieves insights about device such as whether device is in call or not and status about mic and speaker.\r
+
+        \r
+
+        ### Example Curl:\r
+
+        > curl -XGET 'https://[ device_ipv4 ]/api/v1/insights/device' -H 'accept-language: en-US,en' -H 'Content-Type: application/json' -H 'Authorization: Bearer [ auth_token ]' --insecure\r
+
+        \r
+
+        Notes : \r
+
+        - Available only on CollabOS 1.13+\r
+
+        - '[ ]' values to be replaced with actual values | [auth_token] is received in signin api\r
+
+        \r
+
+        ### Resonse Details:\r
+
+        **Device State:**\r
+
+        - IDLE\r
+
+        - AUDIO_ONLY\r
+
+        - IN_USE\r
+
+        \r
+
+        **Mic or Speaker State:**\r
+
+        - MUTED\r
+
+        - UNMUTED\r
+
+        - NOT_SUPPORTED #For cases where audio not supported eg: TAP IP"
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/json
+components:
+  securitySchemes:
+    auth-token:
+      type: apiKey
+      description: "Get an authentication token using the SignIn API.This is a bearer authentication , include the authtoken in the header as 'Authorization : Bearer auth-token'"
+      name: Authorization
+      in: header
+  schemas:
+    DeviceConfig:
+      type: object
+      description: Device Configuration , Where all basic device related configurations are mapped
+      properties:
+        collabOSVersion:
+          type: string
+        deviceConfiguration:
+          type: string
+        ethernetMAC:
+          type: string
+        hwVersion:
+          type: string
+        modelName:
+          type: string
+        serialNumber:
+          type: string
+        systemName:
+          type: string
+        wifiMAC:
+          type: string
+        deviceName:
+          type: string
+        serviceProvider:
+          type: string
+      examples:
+        - collabOSVersion: 1.00.00
+          deviceConfiguration: CONFIG
+          ethernetMAC: aa:ad:ac:44:44:a4
+          hwVersion: "3.1"
+          modelName: Rally Bar Mini
+          serialNumber: 2115FSSSSSS
+          systemName: RallyBarM-SERIAL
+          wifiMAC: aa:ad:ac:44:44:a4
+          deviceName: Rally Bar Mini
+          serviceProvider: MTR
+      x-examples:
+        Example 1:
+          collabOSVersion: 1.10.57
+          deviceConfiguration: DEVICE
+          ethernetMAC: 44:73:d6:85:7f:a3
+          hwVersion: "3.1"
+          modelName: Rally Bar Mini
+          serialNumber: 2115FDZ01YE2
+          systemName: RallyBarM-01YE2
+          wifiMAC: 44:73:d6:85:7f:a4
+          deviceName: Rally Bar Mini
+          serviceProvider: MTR
+    Remote:
+      type: object
+      properties:
+        macAddress:
+          type: string
+        name:
+          type: string
+      examples:
+        - macAddress: D3:A9:2C:5C:8E:A2
+          name: Rally Bar Mini Remote
+      x-examples:
+        Example 1:
+          macAddress: E0:F6:61:9D:9D:C8
+          name: Rally Bar Mini Remote
+    Sight:
+      type: object
+      title: Sight
+      description: This representa a Logitech Sight Device.
+      properties:
+        id:
+          type: string
+          readOnly: true
+        cameraConnected:
+          type: boolean
+          readOnly: true
+          default: false
+        microphoneConnected:
+          type: boolean
+        firmwareVersion:
+          type: string
+      examples:
+        - id: "2170"
+          cameraConnected: false
+          microphoneConnected: true
+          firmwareVersion: 0.5.0
+    Display:
+      type: object
+      properties:
+        id:
+          type: integer
+        hdmiPort:
+          type: integer
+        height:
+          type: integer
+        width:
+          type: integer
+        refreshRate:
+          type: integer
+      examples:
+        - id: 0
+          hdmiPort: 1
+          height: 1080
+          width: 1920
+          refreshRate: 60
+      x-examples:
+        Example 1:
+          id: 0
+          hdmiPort: 1
+          height: 1080
+          width: 1920
+          refreshRate: 60
+    IpController:
+      type: object
+      title: IPController
+      description: This represents a IP Controller (TAP IP)
+      properties:
+        name:
+          type: string
+          readOnly: true
+        manufacturer:
+          type: string
+          readOnly: true
+        firmwareVersion:
+          type: string
+        serialNumber:
+          type: string
+        ipAddress:
+          type: string
+        deviceName:
+          type: string
+      examples:
+        - name: TAP IP
+          manufacturer: Logitech
+          firmwareVersion: 1.11.48
+          serialNumber: "123456789"
+          ipAddress: 192.168.1.15
+          deviceName: TAP IP
+    USBController:
+      type: object
+      title: USBController
+      description: This represents a USB Controller (TAP USB)
+      properties:
+        name:
+          type: string
+          readOnly: true
+        manufacturer:
+          type: string
+          readOnly: true
+        firmwareVersion:
+          type: string
+        swMcuVersion:
+          type: string
+        hwMcuVersion:
+          type: string
+        hdmiVersion:
+          type: string
+        orientation:
+          type: string
+      examples:
+        - name: Tap
+          manufacturer: Logitech
+          firmwareVersion: 1.1.7
+          swMcuVersion: string
+          hwMcuVersion: "5"
+          hdmiVersion: 1.1.7
+          orientation: AUTO
+    USBDevice:
+      type: object
+      properties:
+        id:
+          type: string
+        isAudioDevice:
+          type: boolean
+        isVideoDevice:
+          type: boolean
+        audioFirmwareVersion:
+          type: string
+        videoFirmwareVersion:
+          type: string
+        name:
+          type: string
+        pid:
+          type: string
+        vid:
+          type: string
+      examples:
+        - id: /dev/snd/controlC1
+          isAudioDevice: true
+          isVideoDevice: true
+          audioFirmwareVersion: "1.1"
+          videoFirmwareVersion: "1.1"
+          name: HD Pro Webcam C920
+          pid: "2277"
+          vid: "1133"
+      x-examples:
+        Example 1:
+          id: /dev/snd/controlC1
+          isAudioDevice: true
+          isVideoDevice: true
+          audioFirmwareVersion: "1.1"
+          videoFirmwareVersion: "1.1"
+          name: HD Pro Webcam C920
+          pid: "2277"
+          vid: "1133"
+security:
+  - auth-token: []

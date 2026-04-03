@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "logisync": {
+      "command": "node",
+      "args": ["${workspaceFolder}/dist/index.js"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DISABLE_MCP": "0",
+        "DISABLE_POLLER": "0",
+        "DISABLE_DASHBOARD": "0"
+      }
+    },
+    "zoom": {
+      "command": "uv",
+      "args": ["run", "zoom-mcp"],
+      "cwd": "${workspaceFolder}/../zoom-mcp",
+      "env": {}
+    }
+  }
+}

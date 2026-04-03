@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LogiSync — Rooms</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>LogiSync</h1>
+      <p class="sub">CollabOS room status (cached)</p>
+    </header>
+
+    <section class="toolbar">
+      <label class="file-label">
+        Import Zoom CSV
+        <input type="file" id="csvFile" accept=".csv,text/csv" />
+      </label>
+      <span id="importStatus" class="status"></span>
+      <button type="button" id="refreshBtn">Reload</button>
+    </section>
+
+    <main id="grid" class="grid"></main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
