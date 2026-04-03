@@ -4,6 +4,8 @@ dist/
 
 # Local data & secrets
 data/
+# Zoom admin device exports (IPs, serials, room names — never commit)
+Zoom*.csv
 .env
 .env.*
 !.env.example
