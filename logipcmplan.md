@@ -114,7 +114,7 @@ logisync-mcp/
 │           ├── app.js
 │           └── style.css
 ├── device-management-api.yaml    # Local CollabOS OpenAPI spec (reference)
-├── devices.csv                   # Template / seed CSV
+├── devices.example.csv           # Committed template (RFC 5737 doc IP only); copy to devices.csv locally
 ├── package.json
 ├── tsconfig.json
 └── .env
@@ -156,6 +156,8 @@ raw_json TEXT
 ---
 
 ## CSV Import Format (from Zoom export)
+
+**Repo template:** `devices.example.csv` is safe to commit (documentation IP `192.0.2.x` per RFC 5737). Real Zoom exports should live in **`devices.csv`** or `Zoom*.csv` at repo root — both are **gitignored**.
 
 Actual columns from the live Zoom export:
 ```
@@ -267,7 +269,7 @@ Three independent agents can run in parallel:
 |-------|-------|-------|-------------|
 | 1A: Project scaffold | Haiku | `package.json`, `tsconfig.json`, `.env` template | ~5k |
 | 1B: Database layer | Haiku | `src/db/store.ts` | ~8k |
-| 1C: CSV import + device registry | Haiku | `src/devices/registry.ts`, `devices.csv` template | ~8k |
+| 1C: CSV import + device registry | Haiku | `src/devices/registry.ts`, `devices.example.csv` template | ~8k |
 
 **Parallelism:** **1A** is independent. **1B must expose the schema and a stable `store` API first** — **1C** depends on those exports (types, `upsertDevice`, etc.). Run **1B before or with a short head start**, then 1C; or run 1A+1B in parallel, then 1C immediately after 1B’s interface is fixed.
 **Verification:** `npx ts-node src/db/store.ts` initializes DB; `npm test` (if tests are added).

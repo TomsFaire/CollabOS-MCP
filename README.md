@@ -14,7 +14,7 @@ CollabOS LAN polling, SQLite cache, optional dashboard, and an MCP server so Cur
 1. Copy `.env.example` to `.env` and fill in secrets (never commit `.env`). Older templates may have Datadog keys — you can remove them; this build does not send metrics anywhere except SQLite + MCP.
 2. `npm install`
 3. `npm run build`
-4. Import devices: dashboard **Import Zoom CSV** or MCP tool `import_devices`. Keep Zoom exports (e.g. `Zoom*.csv`) **outside git** — they are listed in `.gitignore` and must not be pushed.
+4. **Inventory CSV:** Export from Zoom admin, then either save as `devices.csv` in the repo root (gitignored) or import via dashboard / `import_devices`. **`devices.csv` and `Zoom*.csv` are gitignored** — never commit real exports. Use **`devices.example.csv`** as the column/format reference; it uses a documentation-only IP ([RFC 5737](https://datatracker.ietf.org/doc/html/rfc5737) `192.0.2.x`), not your LAN.
 
 ## Scripts
 
